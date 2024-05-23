@@ -12,3 +12,4 @@ zipp==3.15.0
 zstandard==0.21.0
 psycopg==3.1.19
 click==8.1.7
+prettytable==3.10.0
