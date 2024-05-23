@@ -11,23 +11,21 @@ def list_g():
 @list_g.command()
 @click.option('--head', 'order',
               flag_value=False,
+              default=True,
               help='Print old logs before new ones')
 @click.option('--tail', 'order', 
               flag_value=True,
-              default=True,
               help='Print new logs before old ones')
 @click.option('--number','-n',
-              default=50,
               type=int,
               show_default=True,
               help='Number of logs to show')
 @click.option('--time','-t', "time",
               type=str,
               nargs=2,
-              default=(None, None),
+              default = (None,None),
               help="Filter logs by period of time")
 @click.option('--level','-l',"level",
-              default="info",
               type=str,
               help='Filter logs by level')
 @click.option('--user','-u',
