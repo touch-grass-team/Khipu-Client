@@ -1,35 +1,41 @@
 import click
-import os
 
 @click.command()
-@click.option('--head', '-h', 
-              flag_value='lower'
+@click.option('--head', '-h','order',
+              flag_value='lower',
               help='Print old logs before new ones')
-@click.option('--tail', '-t', 
-              flag_value='upper'
+@click.option('--tail', '-t','order', 
+              flag_value='upper',
+              default=True,
               help='Print new logs before old ones')
 @click.option('--number','-n',
               default=50,
               type=int,
-              show_default=true,
+              show_default=True,
               help='Number of logs to show')
-@click.option('--level','-n',
+@click.option('--time','-t',
+              type=str,
+              nargs=2,
+              help="Filter logs by period of time")
+@click.option('--level','-l',
               default=30,
               type=str,
               help='Filter logs by level')
-@click.option('--time','-t'
+@click.option('--user','-u',
               type=str,
-              default=)
-
+              help='Filter logs by user')
+@click.option('--service','-s',
+              type=str,
+              help='Filter logs by service')
 @click.option('--database','-d',
               default="syslog_ng",
               type=str,
-              show_default=true)
-def hello(count, name):
-    """Simple program that greets NAME for a total of COUNT times."""
-    for x in range(count):
-        click.echo(f"Hello {name}!")
+              show_default=True)
+
+def khipu_list(order,number,time,level,user,service,database):
+    """CLI for Khipu Log Analyzer"""
+    if 
 
 if __name__ == '__main__':
-    hello()
+    khipu_list()
 
