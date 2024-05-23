@@ -3,6 +3,8 @@
 
 #include <QObject>
 #include <QtWidgets>
+#include <deque>
+#include <set>
 
 struct CLogsData{
     int id;
@@ -18,17 +20,27 @@ class CLogsModel : public QAbstractTableModel{
     Q_OBJECT
 
 public:
-    CLogsModel(QObject *parent = 0);
+    CLogsModel(int dataCnt,QObject *parent = 0);
     int rowCount(const QModelIndex &parent = QModelIndex()) const;
     int columnCount(const QModelIndex &parent = QModelIndex()) const;
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const;
     QVariant headerData(int section, Qt::Orientation orientation,
                                     int role = Qt::DisplayRole) const;
     void add_log(const CLogsData &newData);
+    int get_frequency_for_level(const QString& level) const;
+    std::set <QString> get_levels() const;
+    std::set <QString> get_users() const;
+    std::set <QString> get_processes() const;
 
 private:
-    QVector <CLogsData> storedData;
-
+    std::deque <CLogsData> storedData;
+    std::set <QString> haveLevels;
+    std::set <QString> haveUsers;
+    std::set <QString> haveProcesses;
+    QMap <QString,int> levelsFrequency;
+    QMap <QString,int> usersFrequency;
+    QMap <QString,int> processesFrequecy;
+    int dataCnt;
 };
 
 #endif // LOGSMODEL_H

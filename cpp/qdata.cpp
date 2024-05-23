@@ -7,8 +7,8 @@ void set_db(){
     db.setHostName("localhost");
     db.setPort(5432);
     db.setDatabaseName("syslog_ng");
-    db.setUserName("postgres");
-    db.setPassword("postgres");
+    db.setUserName("log_reader");
+    db.setPassword("client");
 }
 
 void DBErrorsHandler(const QString &message){

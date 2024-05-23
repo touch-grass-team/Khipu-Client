@@ -1,7 +1,7 @@
 #include "LogsModel.h"
 
-CLogsModel::CLogsModel(QObject *parent) : QAbstractTableModel(parent){
-
+CLogsModel::CLogsModel(int dataCnt,QObject *parent) : QAbstractTableModel(parent){
+    this->dataCnt = dataCnt;
 }
 
 int CLogsModel::rowCount(const QModelIndex &parent) const{
@@ -48,5 +48,35 @@ void CLogsModel::add_log(const CLogsData &newData){
     //(storedData.size() > 1000) return;
     beginInsertRows(QModelIndex(),storedData.size(),storedData.size());
     storedData.push_back(newData);
+    levelsFrequency[newData.level]++;
+    usersFrequency[newData.userName]++;
+    processesFrequecy[newData.processName]++;
+    haveLevels.insert(newData.level);
+    haveUsers.insert(newData.userName);
+    haveProcesses.insert(newData.processName);
     endInsertRows();
+    if ((int)storedData.size() > dataCnt){
+        beginRemoveRows(QModelIndex(),storedData.size() - 1,storedData.size() - 1);
+        if (--levelsFrequency[storedData.front().level] == 0) haveLevels.erase(storedData.front().level);
+        if (--usersFrequency[storedData.front().userName] == 0) haveUsers.erase(storedData.front().userName);
+        if (--processesFrequecy[storedData.front().processName] == 0) haveProcesses.erase(storedData.front().processName);
+        storedData.pop_front();
+        endRemoveRows();
+    }
+}
+
+int CLogsModel::get_frequency_for_level(const QString &level) const{
+    return levelsFrequency[level];
+}
+
+std::set<QString> CLogsModel::get_levels() const{
+    return haveLevels;
+}
+
+std::set<QString> CLogsModel::get_users() const{
+    return haveUsers;
+}
+
+std::set<QString> CLogsModel::get_processes() const{
+    return haveProcesses;
 }
