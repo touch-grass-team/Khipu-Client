@@ -51,6 +51,7 @@ void CLogsModel::add_log(const CLogsData &newData){
     endInsertRows();
     if ((int)storedData.size() > dataCnt){
         beginRemoveRows(QModelIndex(),storedData.size() - 1,storedData.size() - 1);
+        levelsFrequency[storedData.front().level]--;
         storedData.pop_front();
         endRemoveRows();
     }
