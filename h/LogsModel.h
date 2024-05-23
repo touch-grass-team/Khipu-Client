@@ -28,18 +28,10 @@ public:
                                     int role = Qt::DisplayRole) const;
     void add_log(const CLogsData &newData);
     int get_frequency_for_level(const QString& level) const;
-    std::set <QString> get_levels() const;
-    std::set <QString> get_users() const;
-    std::set <QString> get_processes() const;
 
 private:
     std::deque <CLogsData> storedData;
-    std::set <QString> haveLevels;
-    std::set <QString> haveUsers;
-    std::set <QString> haveProcesses;
     QMap <QString,int> levelsFrequency;
-    QMap <QString,int> usersFrequency;
-    QMap <QString,int> processesFrequecy;
     int dataCnt;
 };
 
