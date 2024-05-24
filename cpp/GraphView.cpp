@@ -20,13 +20,25 @@ void CGraphView::add_point(int64_t seconds, int curFrequency, const QString &lev
         customPlot->graph(infoGraph)->addData(seconds,curFrequency);
     else if (level == "err")
         customPlot->graph(errGraph)->addData(seconds,curFrequency);
-    else
+    else if (level == "debug")
         customPlot->graph(debugGraph)->addData(seconds,curFrequency);
     havePoints++;
     pointsLevels.push_back(level);
     erase_old_point();
     customPlot->rescaleAxes(true);
     customPlot->replot();
+}
+
+void CGraphView::set_points_size(int pointsSize){
+    this->pointsSize = pointsSize;
+    customPlot->graph(warningGraph)->data()->clear();
+    customPlot->graph(noticeGraph)->data()->clear();
+    customPlot->graph(infoGraph)->data()->clear();
+    customPlot->graph(errGraph)->data()->clear();
+    customPlot->graph(debugGraph)->data()->clear();
+    customPlot->replot();
+    pointsLevels.clear();
+    havePoints = 0;
 }
 
 void CGraphView::set_graph_settings(){
@@ -68,7 +80,7 @@ void CGraphView::erase_old_point(){
             customPlot->graph(infoGraph)->data()->removeBefore(1);
         else if (eraseLevel == "err")
             customPlot->graph(errGraph)->data()->removeBefore(1);
-        else
+        else if (eraseLevel == "debug")
             customPlot->graph(debugGraph)->data()->removeBefore(1);
     }
 }

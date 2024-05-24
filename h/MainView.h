@@ -19,6 +19,7 @@ private:
     QVBoxLayout *filterBox;
     QVBoxLayout *statBox;
     QHBoxLayout *filterAndStatBox;
+    QBoxLayout *buttonsBox;
     //QHBoxLayout *filterAndGraphBox;
    // form layouts
     QFormLayout *formFilter;
@@ -55,17 +56,22 @@ private:
    // other
     QTableView *table;
     CLogsModel *tableModel;
-    QTimer *timer;
+    QTimer *mainTimer;
+    QTimer *dbTimer;
     CGraphView *graphView;
-    const int dataSize = 25;
+    const int dataSize = 250;
     const int timerInterval = 5;
    // methods
     void set_table_settings();
+    void update_combo_from_db();
 
 private slots:
-    void timer_work();
+    void mainTimer_work();
+    void dbTimer_work();
     void on_pbFilter_clicked();
     void on_pbNormal_clicked();
+    void on_table_doubleClicked(QModelIndex index);
+
 };
 
 #endif // MAINVIEW_H

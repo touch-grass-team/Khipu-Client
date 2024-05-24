@@ -20,6 +20,7 @@ public:
     void clear();
     void add_point(int64_t seconds,int curFrequency,
                    const QString &level);
+    void set_points_size(int pointsSize);
 
 private:
    // v,h boxes

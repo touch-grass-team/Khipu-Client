@@ -59,7 +59,8 @@ CMainView::CMainView(QWidget *parent) : QFrame(parent){
     lbTemp2 = new QLabel();
     table = new QTableView();
     tableModel = new CLogsModel(dataSize,this);
-    timer = new QTimer();
+    mainTimer = new QTimer();
+    dbTimer = new QTimer();
     graphView = new CGraphView(dataSize,this);
     comboLevel = new QComboBox();
     comboLevel->setFont(QFont("Montserrat",12));
@@ -89,14 +90,14 @@ CMainView::CMainView(QWidget *parent) : QFrame(parent){
                             "border:none;"
                             "color: white;"
                             "font: bold;"
-                            "background-color: QLinearGradient(x1: 1,y1: 0,x2: 0,y2: 1, stop: 0 #87CEFA,stop: 0.4999 #BA55D3,stop: 0.5 #BA55D3,stop: 1 #238);"
+                            "background-color: QLinearGradient(x1: 1,y1: 0,x2: 0,y2: 1, stop: 0 #F8B88B,stop: 0.4999 #F8B88B,stop: 0.5 #F8B88B,stop: 1 #F2D4D7);"
                             "border-radius: 15px;}"
                             "QPushButton:hover{"
-                            "background-color: QLinearGradient(x1: 1,y1: 0,x2: 0,y2: 1, stop: 0 #00FA9A,stop: 0.4999 #00FA9A,stop: 0.5 #00FA9A,stop: 1 #238);}"
+                            "background-color: QLinearGradient(x1: 1,y1: 0,x2: 0,y2: 1, stop: 0 #C08081,stop: 0.4999 #C08081,stop: 0.5 #C08081,stop: 1 #F2D4D7);}"
                             "QPushButton:disabled{"
                             "background-color: QLinearGradient(x1: 1,y1: 0,x2: 0,y2: 1, stop: 0 #E83812,stop: 0.4999 #E83812,stop: 0.5 #E83812,stop: 1 #238);}"
                             "QPushButton:pressed{"
-                            "background-color: QLinearGradient(x1: 1,y1: 0,x2: 0,y2: 1, stop: 0 #DA70D6,stop: 0.4999 #FFF0F5,stop: 0.5 #FFF0F5,stop: 1 #238);}");
+                            "background-color: QLinearGradient(x1: 1,y1: 0,x2: 0,y2: 1, stop: 0 #F8B88B,stop: 0.4999 #F8B88B,stop: 0.5 #F8B88B,stop: 1 #F2D4D7);}");
     pbNormal = new QPushButton("По умолчанию");
     pbNormal->setFixedSize(150,50);
     pbNormal->setFont(QFont("Montserrat",12));
@@ -104,16 +105,17 @@ CMainView::CMainView(QWidget *parent) : QFrame(parent){
                             "border:none;"
                             "color: white;"
                             "font: bold;"
-                            "background-color: QLinearGradient(x1: 1,y1: 0,x2: 0,y2: 1, stop: 0 #87CEFA,stop: 0.4999 #BA55D3,stop: 0.5 #BA55D3,stop: 1 #238);"
+                            "background-color: QLinearGradient(x1: 1,y1: 0,x2: 0,y2: 1, stop: 0 #F8B88B,stop: 0.4999 #F8B88B,stop: 0.5 #F8B88B,stop: 1 #F2D4D7);"
                             "border-radius: 15px;}"
                             "QPushButton:hover{"
-                            "background-color: QLinearGradient(x1: 1,y1: 0,x2: 0,y2: 1, stop: 0 #00FA9A,stop: 0.4999 #00FA9A,stop: 0.5 #00FA9A,stop: 1 #238);}"
+                            "background-color: QLinearGradient(x1: 1,y1: 0,x2: 0,y2: 1, stop: 0 #C08081,stop: 0.4999 #C08081,stop: 0.5 #C08081,stop: 1 #F2D4D7);}"
                             "QPushButton:disabled{"
                             "background-color: QLinearGradient(x1: 1,y1: 0,x2: 0,y2: 1, stop: 0 #E83812,stop: 0.4999 #E83812,stop: 0.5 #E83812,stop: 1 #238);}"
                             "QPushButton:pressed{"
-                            "background-color: QLinearGradient(x1: 1,y1: 0,x2: 0,y2: 1, stop: 0 #DA70D6,stop: 0.4999 #FFF0F5,stop: 0.5 #FFF0F5,stop: 1 #238);}");
+                            "background-color: QLinearGradient(x1: 1,y1: 0,x2: 0,y2: 1, stop: 0 #F8B88B,stop: 0.4999 #F8B88B,stop: 0.5 #F8B88B,stop: 1 #F2D4D7);}");
     table->setModel(tableModel);
     set_table_settings();
+    update_combo_from_db();
    // filter part
     formFilter->setAlignment(Qt::AlignLeft);
     formFilter->setLabelAlignment(Qt::AlignLeft);
@@ -139,7 +141,8 @@ CMainView::CMainView(QWidget *parent) : QFrame(parent){
    // main part
     filterAndStatBox->addLayout(filterBox);
     filterAndStatBox->addWidget(gbStat);
-    timer->setInterval(timerInterval * 1000);
+    mainTimer->setInterval(timerInterval * 1000);
+    dbTimer->setInterval(60000);
     mainBox->addLayout(filterAndStatBox);
     mainBox->addWidget(table);
     mainBox->addWidget(graphView);
@@ -148,10 +151,13 @@ CMainView::CMainView(QWidget *parent) : QFrame(parent){
     this->setFixedSize(1200,800);
     this->setGeometry(QStyle::alignedRect(Qt::LeftToRight,Qt::AlignCenter,this->size(),QApplication::desktop()->availableGeometry()));
    // connects
-    connect(timer,&QTimer::timeout,this,&CMainView::timer_work);
+    connect(mainTimer,&QTimer::timeout,this,&CMainView::mainTimer_work);
+    connect(dbTimer,&QTimer::timeout,this,&CMainView::dbTimer_work);
     connect(pbFilter,&QPushButton::clicked,this,&CMainView::on_pbFilter_clicked);
     connect(pbNormal,&QPushButton::clicked,this,&CMainView::on_pbNormal_clicked);
-    timer->start();
+    connect(table,&QTableView::doubleClicked,this,&CMainView::on_table_doubleClicked);
+    mainTimer->start();
+    dbTimer->start();
 }
 
 CMainView::~CMainView(){
@@ -160,6 +166,7 @@ CMainView::~CMainView(){
 
 void CMainView::set_table_settings(){
     table->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+    table->setSelectionBehavior(QAbstractItemView::SelectRows);
     table->setFont(QFont("Montserrat",12));
     table->horizontalHeader()->setFont(QFont("Montserrat",12));
     table->setColumnHidden(0,true);
@@ -169,7 +176,42 @@ void CMainView::set_table_settings(){
     table->setFixedHeight(300);
 }
 
-void CMainView::timer_work(){
+void CMainView::update_combo_from_db(){
+    if (!db.open()){
+        DBErrorsHandler(db.lastError().text());
+        return;
+    }
+    QString usersQueryStr = "SELECT * FROM logs.prc_get_unique_users()";
+    QSqlQuery usersQuery;
+    if (!usersQuery.exec(usersQueryStr)){
+        DBErrorsHandler(usersQuery.lastError().text());
+        db.close();
+        return;
+    }
+    comboUsers->clear();
+    comboUsers->addItem("Не выбрано","null");
+    QSqlRecord recUsers = usersQuery.record();
+    while(usersQuery.next()){
+        QString userName = usersQuery.value(recUsers.indexOf("_user_name")).toString();
+        comboUsers->addItem(userName,userName);
+    }
+    QString processesQueryStr = "SELECT * FROM logs.prc_get_unique_processes()";
+    QSqlQuery processesQuery;
+    if (!processesQuery.exec(processesQueryStr)){
+        DBErrorsHandler(processesQuery.lastError().text());
+        db.close();
+        return;
+    }
+    comboProcesses->clear();
+    comboProcesses->addItem("Не выбрано","null");
+    QSqlRecord recProcesses = processesQuery.record();
+    while(processesQuery.next()){
+        QString processName = processesQuery.value(recProcesses.indexOf("_process_name")).toString();
+        comboProcesses->addItem(processName,processName);
+    }
+}
+
+void CMainView::mainTimer_work(){
     if (!db.open()) DBErrorsHandler(db.lastError().text());
     QDateTime currentTime = QDateTime().currentDateTime();
     int64_t seconds = currentTime.toSecsSinceEpoch() - timerInterval;
@@ -203,10 +245,78 @@ void CMainView::timer_work(){
     db.close();
 }
 
+void CMainView::dbTimer_work(){
+    update_combo_from_db();
+}
+
 void CMainView::on_pbFilter_clicked(){
-    timer->stop();
+    if (!db.open()){
+        DBErrorsHandler(db.lastError().text());
+        return;
+    }
+    mainTimer->stop();
+    lbWarningValue->setText("0");
+    lbNoticeValue->setText("0");
+    lbInfoValue->setText("0");
+    lbErrValue->setText("0");
+    lbDebugValue->setText("0");
+    QString level = comboLevel->currentData().toString();
+    QString userName = comboUsers->currentData().toString();
+    QString processName = comboProcesses->currentData().toString();
+    QString dateFrom = dateTimeEditFrom->dateTime().toString("yyyy-MM-dd hh:mm:ss");
+    QString dateTo = dateTimeEditTo->dateTime().toString("yyyy-MM-dd hh:mm:ss");
+    QString queryStr;
+    queryStr.sprintf("SELECT * FROM logs.prc_get_n_filtered_logs_ordered_by_time('false',%d,'%s','%s','%s','%s','%s')",
+                  dataSize,dateFrom.toStdString().c_str(),dateTo.toStdString().c_str(),level.toStdString().c_str(),userName.toStdString().c_str(),processName.toStdString().c_str());
+    QSqlQuery query;
+    if (!query.exec(queryStr)){
+        DBErrorsHandler(query.lastError().text());
+        db.close();
+        return;
+    }
+    QVector <CLogsData> filteredData;
+    QSqlRecord rec = query.record();
+    while(query.next()){
+        int id = query.value(rec.indexOf("_id")).toInt();
+        QDateTime timestamp = query.value(rec.indexOf("_timestamp")).toDateTime();
+        QString level = query.value(rec.indexOf("_level")).toString();
+        QString userName = query.value(rec.indexOf("_user_name")).toString();
+        QString processName = query.value(rec.indexOf("_process_name")).toString();
+        int pid = query.value(rec.indexOf("_pid")).toInt();
+        QString message = query.value(rec.indexOf("_message")).toString();
+        filteredData.push_back(CLogsData{id,timestamp,level,userName,processName,pid,message});
+    }
+    tableModel->set_data_size((int)filteredData.size() + 1);
+    graphView->set_points_size((int)filteredData.size() + 1);
+    for (auto& logInfo : filteredData){
+        tableModel->add_log(logInfo);
+        QString level = logInfo.level;
+        int64_t seconds = logInfo.timestamp.toSecsSinceEpoch();
+        graphView->add_point(seconds,tableModel->get_frequency_for_level(level),level);
+        lbWarningValue->setText(QVariant(tableModel->get_frequency_for_level("warning")).toString());
+        lbNoticeValue->setText(QVariant(tableModel->get_frequency_for_level("notice")).toString());
+        lbInfoValue->setText(QVariant(tableModel->get_frequency_for_level("info")).toString());
+        lbErrValue->setText(QVariant(tableModel->get_frequency_for_level("err")).toString());
+        lbDebugValue->setText(QVariant(tableModel->get_frequency_for_level("debug")).toString());
+    }
+    db.close();
 }
 
 void CMainView::on_pbNormal_clicked(){
-    timer->start();
+    tableModel->set_data_size(dataSize);
+    graphView->set_points_size(dataSize);
+    lbWarningValue->setText("0");
+    lbNoticeValue->setText("0");
+    lbInfoValue->setText("0");
+    lbErrValue->setText("0");
+    lbDebugValue->setText("0");
+    mainTimer->start();
 }
+
+void CMainView::on_table_doubleClicked(QModelIndex index){
+    if (!index.isValid()) return;
+    int row = index.row();
+    QString message = tableModel->get_message(row);
+    QMessageBox::information(this,"Содержание",message);
+}
+

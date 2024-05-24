@@ -1,7 +1,7 @@
 #include "LogsModel.h"
 
 CLogsModel::CLogsModel(int dataCnt,QObject *parent) : QAbstractTableModel(parent){
-    this->dataCnt = dataCnt;
+    this->dataSize = dataCnt;
 }
 
 int CLogsModel::rowCount(const QModelIndex &parent) const{
@@ -49,7 +49,7 @@ void CLogsModel::add_log(const CLogsData &newData){
     storedData.push_back(newData);
     levelsFrequency[newData.level]++;
     endInsertRows();
-    if ((int)storedData.size() > dataCnt){
+    if ((int)storedData.size() > dataSize){
         beginRemoveRows(QModelIndex(),storedData.size() - 1,storedData.size() - 1);
         levelsFrequency[storedData.front().level]--;
         storedData.pop_front();
@@ -59,4 +59,22 @@ void CLogsModel::add_log(const CLogsData &newData){
 
 int CLogsModel::get_frequency_for_level(const QString &level) const{
     return levelsFrequency[level];
+}
+
+QString CLogsModel::get_message(int row) const{
+    return storedData[row].message;
+}
+
+void CLogsModel::set_data_size(int dataSize){
+    this->dataSize = dataSize;
+    erase_data();
+}
+
+void CLogsModel::erase_data(){
+    while(storedData.size() > 0){
+        beginRemoveRows(QModelIndex(),storedData.size() - 1,storedData.size() - 1);
+        levelsFrequency[storedData.front().level]--;
+        storedData.pop_front();
+        endRemoveRows();
+    }
 }

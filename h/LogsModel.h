@@ -28,11 +28,16 @@ public:
                                     int role = Qt::DisplayRole) const;
     void add_log(const CLogsData &newData);
     int get_frequency_for_level(const QString& level) const;
+    QString get_message(int row) const;
+    void set_data_size(int dataSize);
 
 private:
     std::deque <CLogsData> storedData;
     QMap <QString,int> levelsFrequency;
-    int dataCnt;
+    int dataSize;
+   // methods
+    void erase_data();
+
 };
 
 #endif // LOGSMODEL_H
