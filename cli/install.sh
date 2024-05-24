@@ -24,3 +24,6 @@ rm -rf venv
 chmod 755 $INSTALLER_DIR/build/khipu
 cp -f $INSTALLER_DIR/build/khipu /bin
 rm -rf $INSTALLER_DIR/build
+
+cd ..
+cp -f KhipuClient /bin
