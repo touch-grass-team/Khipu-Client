@@ -1,7 +1,7 @@
 id_part=0.05
-timestamp_part=0.2
-level_part=0.1
-user_part=0.1
-process_part=0.1
+timestamp_part=0.1
+level_part=0.05
+user_part=0.05
+process_part=0.05
 pid_part=0.03
-message_part=0.42
+message_part=0.67
